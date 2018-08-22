@@ -1,0 +1,1276 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="%ZCSP.Page">
+<Description><![CDATA[
+Include %callout
+Глобальные переменные:
+   %ClientIP 
+   %ProcessID
+
+<br> <!--  <script language="JavaScript" type="text/javascript" src="%25ZCSP.Page.cls?ProcessID=ИдентификаторПроцессаККоторомуБудемПодключатся"></script>  -->
+<br> <!--  <script language="JavaScript" type="text/javascript" src="%25ZCSP.Page.cls/?include=#(##this)#"></script> -->
+<br> <!--  <script language="JavaScript" type="text/javascript" src="%25ZCSP.Page.cls/?ProcessID=ИдентификаторПроцесса&interval=1000"></script> -->
+<pre> 
+Пример для ПК SIRENA
+  &lt;script language="JavaScript" type="text/javascript" src="#($SYSTEM.CSP.GetDefaultApp($ZU(5)))#/#($zcvt("%ZCSP.Page","O","URL"))#.cls?ProcessID=#($zu(5))#&interval=15000"&gt;&lt;/script&gt;
+  <!--  <script language="JavaScript" type="text/javascript" src="#($SYSTEM.CSP.GetDefaultApp($ZU(5)))#/#($zcvt("%ZCSP.Page","O","URL"))#.cls?ProcessID=#($zu(5))#&interval=15000"></script>  -->
+
+Закрыть процесс на сервере
+  #server(logout())#
+
+Прочитать сообщение с сервера
+  #server(read())#
+
+Оставить JS сообщение пользователю
+  d ##class(%ZCSP.Page).SendJS("10.20.29.67","alert(11)","SIRENA")
+  d ##class(%ZCSP.Page).SendJS("10.20.29.67","alert(11)")
+
+Разлогинить себя из кода 
+ d ##class(%ZCSP.Page).logout()
+
+Принудительно отключить всех пользователей
+  d ##class(%ZCSP.Page).CloseAllProcess()
+
+<example>  
+ Class User.main Extends %ZCSP.Page
+ {
+ 
+ ClassMethod main()
+ {
+    w $h_"  "_$job
+  &html<
+       <script language='JavaScript'>
+       alert('#($h_"    "_$job)#');
+       if(typeof Android != "undefined"){  Android.alert('#($h_"    "_$job)#');}  
+       alert(test());
+      </script>
+   >
+   w $c(13,10),"  <script language='JavaScript'>"
+   &js<
+       alert('#($h_"    "_$job)#');
+   >
+   w $c(13,10),"</script>"
+  
+   w "<pre>"
+   zw 
+   w !,!
+   zw %request
+   w "</pre>"
+  }
+ ClassMethod test() As %String [ Language = cache, WebMethod ]
+ {
+   w $h
+   q ""
+ }
+}
+</example> 
+</pre>]]></Description>
+<Super>%CSP.Page</Super>
+<TimeCreated>64838,28485.429986</TimeCreated>
+
+<UDLText name="T">
+<Content><![CDATA[
+// Parameter CodePage = "CP1251";
+
+]]></Content>
+</UDLText>
+
+<Parameter name="CodePage">
+<Description><![CDATA[
+<br>   "CP1251" или "UTF-8"]]></Description>
+<Default>UTF-8</Default>
+</Parameter>
+
+<Parameter name="ProcessID">
+<Default>sirena</Default>
+</Parameter>
+
+<Parameter name="Interval">
+</Parameter>
+
+<Parameter name="GlobalMessage">
+<Default>^mtempZCSP.Page</Default>
+</Parameter>
+
+<Parameter name="include">
+</Parameter>
+
+<Parameter name="script">
+</Parameter>
+
+<Parameter name="style">
+</Parameter>
+
+<Method name="main">
+<ClassMethod>1</ClassMethod>
+<Implementation><![CDATA[
+	&html<
+	  Необходимо создать клсс метод "main" в классе #(##this)#
+	  <pre>
+       Class #(##this)# Extends #(^oddDEF(##this,60))#
+       {
+         --//--  
+          <font color="red">ClassMethod main()
+          {
+          }</font>
+         --//--  	  
+       }   
+	  </pre>
+	>
+]]></Implementation>
+</Method>
+
+<Method name="OnPreHTTP">
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Library.Boolean</ReturnType>
+<Implementation><![CDATA[
+     s:$l(..#CodePage)>0 %response.CharSet=..#CodePage  ; для ПК Сироена
+     ;   s %response.CharSet="UTF-8"  
+	 ;   s %response.CharSet="CP1251"  
+	 if ##this="%ZCSP.Page"{	   
+        Do %response.SetHeader("Content-Type","application/javascript")   
+	 }
+     q 1
+]]></Implementation>
+</Method>
+
+<Method name="GetJsonRequest">
+<ClassMethod>1</ClassMethod>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+        s obj=##class(%ZEN.proxyObject).%New()
+        s ind=""
+        for {
+	      s ind=$o(%request.Data(ind))
+	      q:ind=""
+	      if $d(%request.Data(ind,1)){
+		     s obj.%data(ind)=%request.Data(ind,1)   		     
+	      }
+        }
+        k ^SPOOL($job)
+        O 2:($job)
+        U 2:($job)
+        do ##class(%ZEN.Auxiliary.jsonProvider).%ObjectToJSON(obj,,,"aelotw")	
+        c 2:($job)
+        if $d(%request.CgiEnvs("Cache version")) {USE $ZUTIL(53):(::"M")}else{u 0}
+        s resul=""
+        s indexSPOOL=""
+        for
+        {  
+           s indexSPOOL=$o(^SPOOL($job,indexSPOOL)) 
+           q:indexSPOOL=""   
+           s indexSPOOL2=indexSPOOL s indexSPOOL2=$o(^SPOOL($job,indexSPOOL2))
+           if indexSPOOL2'="" 
+           {
+	          s str=^SPOOL($job,indexSPOOL)
+	          s resul=resul_str
+           }
+        }
+        s resul=$REPLACE(resul,$c(13,10,9,9),"")
+        s resul=$REPLACE(resul,$c(13,10,9),"")
+        s resul=$REPLACE(resul,"}, {","},{")
+        s resul=$REPLACE(resul,"[ {","[{")
+        s resul=$REPLACE(resul,"} ]","}]")
+        s resul=$REPLACE(resul,"}"_$c(13,10)_"]","}]")
+        s resul=$REPLACE(resul,$c(13,10)_"}","}")
+        k ^SPOOL($job)
+        q resul
+]]></Implementation>
+</Method>
+
+<Method name="OnPage">
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+    #dim %response as %CSP.Response 
+    s %ProcessID=%request.Get("ProcessID","")
+    s %ProcessID=$zcvt(%ProcessID,"I","URL")
+    s %ParentClass=""
+	if $d(%request.CgiEnvs("HTTP_REFERER")){
+        s ref=%request.CgiEnvs("HTTP_REFERER")
+        s ref=$e( ref  , $l(  $p(ref,"/",1))+2,$l(ref)) 
+        s ref=$e( ref  , $l(  $p(ref,"/",1))+2,$l(ref)) 
+        s ref=$e( ref  , $l(  $p(ref,"/",1))+2,$l(ref)) 
+        s ref=$p(ref,"?",1)
+        if $e(ref,$l(ref),$l(ref))="\"{
+          s ref=$e(ref,1,$l(ref)-1)
+        }
+        s %ParentClass=ref
+    }
+    if %ProcessID="" {
+	    if ##this'="%ZCSP.Page"{
+		  if $l(..#ProcessID)>0{
+	        s %ProcessID=..#ProcessID
+		  }
+	    }else{
+          s %ProcessID=##this
+	    }
+    }   
+    
+         
+    if %ProcessID="" s %ProcessID=%ParentClass
+
+    s %ClientIP=..GetIP()
+   
+    /// Подключение класса и интерпритация его как JS библиотек
+    if %request.Get("include","")'=""{
+	   s ClassCSP=%request.Get("include","")
+	   s ClassCSP=$zcvt(ClassCSP,"I","URL")
+	   s ClassCSP=$tr(ClassCSP," ","")
+	   ; убираем расширение *.cls
+	   if %request.Get("cls","")'=""{ 
+		 s ClassCSP=$e(ClassCSP,1,$l(ClassCSP)-4)   
+	   }
+	   k filtr
+	   for ind=1:1:$l(ClassCSP,","){
+	      d $system.OBJ.GetDependencies($p(ClassCSP,",",ind),.included)
+          s ClassParentTmp=""
+          for {
+            s ClassParentTmp=$o(included(ClassParentTmp))
+            q:ClassParentTmp=""
+            continue:$d(filtr(ClassParentTmp))
+            d ..readJSFunctionFromCacheClass(ClassParentTmp)
+            s filtr(ClassParentTmp)=1
+          } 
+	   }
+	   q 1   
+    }
+    	
+     if '$d(@..#GlobalMessage@(%ClientIP,%ProcessID)){
+       d ..SirenaIdent()
+	   job ..loop(%ClientIP,%ProcessID) 
+       s @..#GlobalMessage@(%ClientIP,%ProcessID)=$zchild  
+       s @..#GlobalMessage@(%ClientIP,%ProcessID,"CreateJob")=$zdt($h,4)
+       s @..#GlobalMessage@(%ClientIP,%ProcessID,"NameSpace")=$zu(5)
+       s LastJobId=$zchild
+       if %request.GetCgiEnv("Cache version","")="" {
+	      s @..#GlobalMessage@(%ClientIP,%ProcessID,"USER-AGENT")=%request.CgiEnvs("HTTP_USER_AGENT")
+	   }else{
+          s @..#GlobalMessage@(%ClientIP,%ProcessID,"USER-AGENT")=%request.CgiEnvs("USER-AGENT")
+       }
+       s @..#GlobalMessage@(%ClientIP,%ProcessID,"SessionKey")=%session.Key
+	}else{
+	   s LastJobId=@..#GlobalMessage@(%ClientIP,%ProcessID)
+       if '$DATA(^$JOB(LastJobId)) {
+       d ..SirenaIdent()
+	      job ..loop(%ClientIP,%ProcessID) 
+          s @..#GlobalMessage@(%ClientIP,%ProcessID)=$zchild  
+          s @..#GlobalMessage@(%ClientIP,%ProcessID,"CreateJob")=$zdt($h,4)
+          s @..#GlobalMessage@(%ClientIP,%ProcessID,"NameSpace")=$zu(5)
+          s LastJobId=$zchild
+          if %request.GetCgiEnv("Cache version","")="" {
+	         s @..#GlobalMessage@(%ClientIP,%ProcessID,"USER-AGENT")=%request.CgiEnvs("HTTP_USER_AGENT")
+	      }else{
+             s @..#GlobalMessage@(%ClientIP,%ProcessID,"USER-AGENT")=%request.CgiEnvs("USER-AGENT")
+	      }
+       }
+	}	
+	s @..#GlobalMessage@(%ClientIP,%ProcessID,"ParentJob")=$job
+	s @..#GlobalMessage@(%ClientIP,%ProcessID,"LastQuery")=$zdt($h,4)
+	s @..#GlobalMessage@(%ClientIP,%ProcessID,"ParentClass")=%ParentClass
+	
+     d %session.Unlock()
+     d %session.%Save()
+     s @..#GlobalMessage@(%ClientIP,%ProcessID,"SessionId")=%session.%Id()
+     //  w %request.GetCgiEnv("Cache version","")
+     //  InsertCgiEnv("Cache version",$$GetVersion^%apiOBJ())
+	 //  Опрос буфера через установленны интервал вренеми
+	 if $d(%request.Data("GetMessage")){ 
+	    if ..MesageForUser()=1 q 1
+	    d ..ReadBuf()
+	    q 1
+	 }
+	 
+     if $d(%request.Data("cspIntRunMethod")){       
+	    /// Конвертируем Request в JSON
+        set @..#GlobalMessage@(%ClientIP,%ProcessID,"Request")=..GetJsonRequest()
+        s WEVENT=%request.Get("WEVENT","")
+        if $l(WEVENT,".")'=1 w "Ошибка в формате запроса" q
+        s WEVENT=$lg($$$cspDecode(@..#GlobalMessage@(%ClientIP,%ProcessID,"SessionKey"),WEVENT),1) 
+        s WEVENT=$p(WEVENT,":",1) ; ????
+        s method=$p(WEVENT,".",$l(WEVENT,"."))
+        
+        if $zcvt(WEVENT,"L")="logout" {
+           do $system.Event.Signal(LastJobId,"exit")
+           q 1
+        }
+        if $zcvt(WEVENT,"L")="read" {
+	       d ..ReadBuf()
+           q 1
+        } 
+        
+        if $zcvt(WEVENT,"L")="clear" {
+	        k @..#GlobalMessage@(%ClientIP,%ProcessID,"buff")
+	        q 1
+        }
+        
+        s class=$e(WEVENT,1,$l(WEVENT)-$l(method)-1)
+        if class="."{
+           s class= $SYSTEM.CSP.GetClassName("/"_%ParentClass)
+        } 
+        // s ObjJson=..ConvertJson(class,method)
+        // s @..#GlobalMessage@(%ClientIP,%ProcessID,"Message")=ObjJson 
+        
+        if %request.Get("isCall",0)=0{
+           do $system.Event.Signal(LastJobId,"Sync") // передаем сигнал на пробуждения пользовательского процесса	
+           s msg=$list($system.Event.WaitMsg(), 2)   // ожидаем ответа из процесса (подвещиваем процесс)
+        }else{
+           do $system.Event.Signal(LastJobId,"ASync") // передаем сигнал на пробуждения пользовательского процесса	
+           q 1
+        }
+        if $d(%request.CgiEnvs("Cache version")) {USE $ZUTIL(53):(::"M")}else{u 0}
+        /// отправляем ответ
+        d ..ReadBuf()
+        Quit $$$OK
+	 }
+	
+	
+   if ##this'="%ZCSP.Page"{	   
+  
+    w "<script>"
+    d ..DrawJsFun("1")   
+    
+   if %ParentClass'="" {
+	   k filtr
+	   s %ParentClass= $SYSTEM.CSP.GetClassName("/"_%ParentClass)
+       d $system.OBJ.GetDependencies(%ParentClass,.included)
+       s ClassParentTmp=""
+       for {
+         s ClassParentTmp=$o(included(ClassParentTmp))
+         q:ClassParentTmp=""
+         continue:$d(filtr(ClassParentTmp))
+         d ..readJSFunctionFromCacheClass(ClassParentTmp)
+         s filtr(ClassParentTmp)=1
+       } 
+   }
+    w "</script>"
+   
+        // &html<<script language="JavaScript" type="text/javascript" src="#($SYSTEM.CSP.GetDefaultApp($ZU(5)))#/#($zcvt("%ZCSP.Page","O","URL"))#.cls?ProcessID=#(%ProcessID)#&Time=#($zt(+$h))#"></script> >
+        
+        /// путь к стилям (перечисляется через запятую)
+        if $l(..#style)>0{
+		     for ind=1:1:$l(..#style,","){     
+	          s stylePath=$tr($p(..#style,",",ind)," ","")
+	          &html<<link  href="#(stylePath)#"  rel='stylesheet' >>
+   	         }
+		 }
+		
+        /// путь к скриптам (перечисляется через запятую)
+        if $l(..#script)>0{
+		     for ind=1:1:$l(..#script,","){     
+	          s ScriptPath=$tr($p(..#script,",",ind)," ","")
+	          &html<
+                 <script language="JavaScript" type="text/javascript" src="#(ScriptPath)#"></script> 
+              >
+   	         }
+		 }
+		 
+        
+        if $l(..#include)>0{
+		     for ind=1:1:$l(..#include,","){     
+	          s ClassNameInclude=$tr($p(..#include,",",ind)," ","")
+	          &html<
+                   <script language="JavaScript" type="text/javascript" src="#($SYSTEM.CSP.GetDefaultApp($ZU(5)))#/#($zcvt("%ZCSP.Page","O","URL"))#.cls?include=#($zcvt(ClassNameInclude,"O","URL"))#"></script> 
+              >
+   	         }
+		 }
+
+         s %JobId=LastJobId
+	  
+	     w "<script>"   	 
+	      d $system.OBJ.GetDependencies("%ZCSP.Page",.included)
+          s ClassParentTmp=""
+          for {
+            s ClassParentTmp=$o(included(ClassParentTmp))
+            q:ClassParentTmp=""
+            continue:$d(filtr(ClassParentTmp))
+            d ..readJSFunctionFromCacheClass(ClassParentTmp)
+            s filtr(ClassParentTmp)=1
+          }   
+          k filtr 	
+	     w "</script>"   	 
+	       
+	     if $l(..#include)>0{
+		     for ind=1:1:$l(..#include,","){     
+	          s ClassNameInclude=$tr($p(..#include,",",ind)," ","")
+	          &html<
+                   <script language="JavaScript" type="text/javascript" src="#($SYSTEM.CSP.GetDefaultApp($ZU(5)))#/#($zcvt("%ZCSP.Page","O","URL"))#.cls?include=#($zcvt(ClassNameInclude,"O","URL"))#"></script> 
+              >
+   	         }
+		 }
+        if '$d(%request.Data("WEVENT",1)){
+            s WEVENT=$$$cspEncode(@..#GlobalMessage@(%ClientIP,%ProcessID,"SessionKey"),$lb(##this_"."_"main"))
+	        s %request.Data("WEVENT",1)=WEVENT
+	        s %request.Data("WARGC",1)=0
+        }
+        s @..#GlobalMessage@(%ClientIP,%ProcessID,"Request")=..GetJsonRequest()
+        do $system.Event.Signal(LastJobId,"Sync") // передаем сигнал на пробуждения пользовательского процесса	
+        s msg=$list($system.Event.WaitMsg(), 2)   // ожидаем ответа из процесса (подвещиваем процесс)
+        d ..ReadBuf() // читаем ответ 
+	   // d ..main()
+       q 1
+   }
+
+   d ..DrawJsFun("1")   	
+   if %ParentClass'="" {
+	   k filtr
+	   s %ParentClass= $SYSTEM.CSP.GetClassName("/"_%ParentClass)
+       d $system.OBJ.GetDependencies(%ParentClass,.included)
+       s ClassParentTmp=""
+       for {
+         s ClassParentTmp=$o(included(ClassParentTmp))
+         q:ClassParentTmp=""
+         continue:$d(filtr(ClassParentTmp))
+         d ..readJSFunctionFromCacheClass(ClassParentTmp)
+         s filtr(ClassParentTmp)=1
+       } 
+   }
+   
+  Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="logout">
+<Description>
+d ##class(%ZCSP.Page).logout()</Description>
+<ClassMethod>1</ClassMethod>
+<Implementation><![CDATA[
+  q:'$d(%ProcessID)
+  q:'$d(%ClientIP)
+  q:'@..#GlobalMessage@(%ClientIP,%ProcessID)
+  s LastJobId=@..#GlobalMessage@(%ClientIP,%ProcessID)
+  do $system.Event.Signal(LastJobId,"exit")
+  q
+]]></Implementation>
+</Method>
+
+<Method name="loop">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>ip="",ProcessID=""</FormalSpec>
+<ProcedureBlock>0</ProcedureBlock>
+<Implementation><![CDATA[
+    // #define cspEncode(%k,%d)      $translate($System.Encryption.AESBase64Encode(%d,%k),"+=/"_$char(32,13,10),"_-$") 
+    // #define cspDecode(%k,%d)      $System.Encryption.AESBase64Decode($translate(%d,"_-$","+=/"),%k) 
+ 
+    // d ..Test2()
+	s %ClientIP=ip
+	s %ProcessID=ProcessID
+	k ProcessID,ip
+	; -----------------------
+	; Дороботка для ПК SIRENA
+	if $d(@..#GlobalMessage@(%ClientIP,%ProcessID,"UserName")){
+       s %SirenaUser=$lg(@..#GlobalMessage@(%ClientIP,%ProcessID,"UserName"),1)
+       s %SirenaUserName=$lg(@..#GlobalMessage@(%ClientIP,%ProcessID,"UserName"),2)
+       s %SirenaUserLogin=$lg(@..#GlobalMessage@(%ClientIP,%ProcessID,"UserName"),3)
+	}
+    ; -----------------------
+	; -----------------------
+	if $d(@..#GlobalMessage@(%ClientIP,%ProcessID,"USER-AGENT")){
+      s %UserAgent=@..#GlobalMessage@(%ClientIP,%ProcessID,"USER-AGENT")
+	}
+	s %LastIO=$IO
+    for {
+      u %LastIO::("^"_$zn)
+      d ##class(%Device).ReDirectIO($$$YES) 
+ 
+  	  s %CommandParentJob=$list($system.Event.WaitMsg(), 2)
+	  if %CommandParentJob="exit" q 
+	  s %ParentJobProcess=""
+	  if $d(@..#GlobalMessage@(%ClientIP,%ProcessID,"ParentJob")){
+	    s %ParentJobProcess=@..#GlobalMessage@(%ClientIP,%ProcessID,"ParentJob")
+	  }
+
+      s %ParentClass=""
+	  if $d(@..#GlobalMessage@(%ClientIP,%ProcessID,"ParentClass")){
+	     s %ParentClass=@..#GlobalMessage@(%ClientIP,%ProcessID,"ParentClass")
+	  }
+
+     if $d(@..#GlobalMessage@(%ClientIP,%ProcessID,"SessionId")){
+	    s %session=""
+        if $d(@..#GlobalMessage@(%ClientIP,%ProcessID,"SessionId")){
+           s %session=##class(%CSP.Session).%OpenId(@..#GlobalMessage@(%ClientIP,%ProcessID,"SessionId"))
+	       d %session.Unlock()
+           d %session.%Save()
+        }
+        s %sessionKey=@..#GlobalMessage@(%ClientIP,%ProcessID,"SessionKey")
+     }
+
+     s %request=##class(%CSP.Request).%New()  
+	 if $d(@..#GlobalMessage@(%ClientIP,%ProcessID,"Request")){
+	    s tmp=@..#GlobalMessage@(%ClientIP,%ProcessID,"Request")
+	    do ##class(%ZEN.Auxiliary.jsonProvider).%ConvertJSONToObject(tmp,,.tmp2,1)
+        s nam=""
+        for {
+           s nam=$o(tmp2.%data(nam))
+           q:nam=""
+           Do %request.Set(nam,tmp2.%data(nam))
+        }
+        k nam,tmp2,tmp
+	    ; k request,request1
+     }
+	 try {
+		if $d(%request.Data("WEVENT",1)){
+		 set %InputArgumentsForRunMethod=%request.Get("WARGC",0)
+		 for %ArgumentLimeMethodForWrite=1:1:%request.Get("WARGC",0){
+			 set %InputArgumentsForRunMethod(%ArgumentLimeMethodForWrite)=%request.Get("WARG_"_%ArgumentLimeMethodForWrite,"")
+ 	         // s arg=%ExecMethod.Args.GetAt(%ArgumentLimeMethodForWrite)
+             //set %InputArgumentsForRunMethod(%ArgumentLimeMethodForWrite)=arg
+             k arg
+		 }
+        s WEVENT=%request.Get("WEVENT","")
+        s WEVENT=$lg($$$cspDecode(%sessionKey,WEVENT),1) 
+        s WEVENT=$p(WEVENT,":",1) ; ????
+        s %method=$p(WEVENT,".",$l(WEVENT,"."))
+        s %class=$e(WEVENT,1,$l(WEVENT)-$l(%method)-1)
+        if %class="."{ s %class=%ParentClass} 
+        k WEVENT
+         
+	    if '$d(^oddDEF(%class,"m",%method,42)) {
+            d $classmethod(%class, %method, %InputArgumentsForRunMethod...)
+        } Else {
+            w $classmethod(%class, %method, %InputArgumentsForRunMethod...)
+        }
+      }
+		 /*	 
+	     #dim %ExecMethod as %ZEN.proxyObject
+         do ##class(%ZEN.Auxiliary.jsonProvider).%ConvertJSONToObject(%InputMessageForCallProcess,,.%ExecMethod,1)
+         if %ExecMethod'="" {
+            d ..CacheCallServerFunction()      
+            k %InputMessageForCallProcess
+		}
+		*/
+      } CATCH {  &js<#($zcvt($ZERROR,"O","JS"))#> }
+    
+      d ##class(%Device).ReDirectIO($$$NO)
+      u %LastIO
+      m @..#GlobalMessage@(%ClientIP,%ProcessID,"buff")=^||tmp
+      k ^||tmp
+      if %ParentJobProcess'="",%CommandParentJob="Sync" {
+	     d $system.Event.Signal(%ParentJobProcess,"OK")   
+      }
+      k %CommandParentJob
+    }
+    k @..#GlobalMessage@(%ClientIP,%ProcessID)
+  
+  
+  ;  c %XDEV
+  ;  u %LastIO
+]]></Implementation>
+</Method>
+
+<Method name="redirects">
+<Description>
+Публичные точки входа, использующиеся при перенаправлении ввода/вывода</Description>
+<Internal>1</Internal>
+<ClassMethod>1</ClassMethod>
+<Private>1</Private>
+<ProcedureBlock>0</ProcedureBlock>
+<Implementation><![CDATA[
+	; m @..#GlobalMessage@(%ClientIP,%ProcessID,"buff")=^||tmp
+wstr(s) 
+     ; s @..#GlobalMessage@(%ClientIP,%ProcessID,"buff")=$i( @..#GlobalMessage@(%ClientIP,%ProcessID,"buff"))
+     ; s @..#GlobalMessage@(%ClientIP,%ProcessID,"buff", @..#GlobalMessage@(%ClientIP,%ProcessID,"buff"))=s
+      s ^||tmp($i(^||tmp))=s 
+      q
+
+
+wchr(c) 
+   ;  s @..#GlobalMessage@(%ClientIP,%ProcessID,"buff")=$i( @..#GlobalMessage@(%ClientIP,%ProcessID,"buff"))
+   ;  s @..#GlobalMessage@(%ClientIP,%ProcessID,"buff", @..#GlobalMessage@(%ClientIP,%ProcessID,"buff"))=$c(c)
+    s ^||tmp($i(^||tmp))=$c(c)
+    q
+
+wnl 
+    ;  s @..#GlobalMessage@(%ClientIP,%ProcessID,"buff")=$i( @..#GlobalMessage@(%ClientIP,%ProcessID,"buff"))
+    ; s @..#GlobalMessage@(%ClientIP,%ProcessID,"buff", @..#GlobalMessage@(%ClientIP,%ProcessID,"buff"))=$$$NL
+    s ^||tmp($i(^||tmp))=$$$NL 
+    q
+
+wff 
+    ; s @..#GlobalMessage@(%ClientIP,%ProcessID,"buff")=$i( @..#GlobalMessage@(%ClientIP,%ProcessID,"buff"))
+    ;    s @..#GlobalMessage@(%ClientIP,%ProcessID,"buff", @..#GlobalMessage@(%ClientIP,%ProcessID,"buff"))=$c(12) 
+    s ^||tmp($i(^||tmp))=$c(12) 
+    q
+
+wtab(s) 
+   ;  s @..#GlobalMessage@(%ClientIP,%ProcessID,"buff")=$i( @..#GlobalMessage@(%ClientIP,%ProcessID,"buff"))
+   ;   s @..#GlobalMessage@(%ClientIP,%ProcessID,"buff", @..#GlobalMessage@(%ClientIP,%ProcessID,"buff"))=s
+    s ^||tmp($i(^||tmp))=s 
+    q
+]]></Implementation>
+</Method>
+
+<Method name="ConvertJson">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>ClassName="",MethodName=""</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+  
+	  s res="{"
+	  s res=res_"""Class"":"""_$zcvt(ClassName,"O","JS")_""""
+	  s res=res_",""Method"":"""_$zcvt(MethodName,"O","JS")_""""
+	  s args=""
+	  Set count=$Get(%request.Data("WARGC",1),0)
+      if count>0 {
+        For i=1:1:count {
+          Set arg="WARG_"_i
+          If $Data(%request.Data(arg,1)) {
+                if '$isObject(%request.Data(arg,1)) {
+	              s:$l(args)>0 args=args_","
+	              s args=args_""""_$zcvt(%request.Data(arg,1) ,"O","JS")_""""
+                }else{
+	              ; do ##class(%ZEN.Auxiliary.jsonProvider).%ObjectToJSON(%request.Data(arg,1),.jsonEl,,"aceloqtw")
+	              ; d obj.args.Insert(jsonEl)   
+                }
+          } ElseIf $Data(%request.Data("WLIST"_i,1)) {
+               Set var="W"_i
+               For j=1:1:%request.Data("WLIST"_i,1) {
+                    If $Data(%request.Data(var,j)) {
+                      if $isObject(%request.Data(var,j)) {
+	                     ; try {
+	                     ;    do ##class(%ZEN.Auxiliary.jsonProvider).%ObjectToJSON(%request.Data(var,j),.jsonEl,,"aceloqtw")
+	                     ;    d obj.args.Insert(jsonEl)   
+	                     ; } CATCH exp{
+                         ;    d obj.args.Insert(exp)   
+                         ; }
+                       }else{
+	                      s:$l(args)>0 args=args_","
+	                      s args=args_""""_$zcvt(%request.Data(var,j) ,"O","JS")_""""
+                       }
+                    }
+               }
+            }
+          }
+        }
+    s res=res_",""Args"":["_args_"]"
+    s res=res_"}"
+	q res
+]]></Implementation>
+</Method>
+
+<Method name="CacheCallServerFunction">
+<ClassMethod>1</ClassMethod>
+<Implementation><![CDATA[
+    s %class=%ExecMethod.Class
+    s %method=%ExecMethod.Method
+    s %request.Method=%ExecMethod.Method
+    ; s %request.URL=
+    /*
+    s %methodArgs=0
+    if $d(^oddDEF(%class,"m",%method,27)){
+        s args=^oddDEF(%class,"m",%method,27)
+        if $l(args,"=")>1 {
+          for  {
+             s nam=$e(args,1,$l($p(args,"=",1)))
+             s args=$e(args,$l(nam)+1,$l(args))
+             s val=$e(args,2,$l($p(args,",",1)))
+             s args=$e(args,$l(val)+3,$l(args))
+             s %methodArgs=%methodArgs+1
+             s %methodArgs(%methodArgs)=$lb(nam,val)
+             q:$l(args)=0
+          }
+       }
+    }
+    k arg,args,nam,val
+    */
+    
+       set %InputArgumentsForRunMethod=%ExecMethod.Args.Count()       
+       For %ArgumentLimeMethodForWrite=1:1:%ExecMethod.Args.Count(){
+	     s arg=%ExecMethod.Args.GetAt(%ArgumentLimeMethodForWrite)
+         set %InputArgumentsForRunMethod(%ArgumentLimeMethodForWrite)=arg
+         k arg
+       }  
+       k arg,dat
+ 
+     
+    k %ArgumentLimeMethodForWrite,%ExecMethod,%InputArgumentsForRunMethod
+    if '$d(^oddDEF(%class,"m",%method,70)) {
+        if '$d(^oddDEF(%class,"m",%method,42)) {
+            d $classmethod(%class, %method, %InputArgumentsForRunMethod...)
+        } Else {
+            w $classmethod(%class, %method, %InputArgumentsForRunMethod...)
+        }
+     }else{
+        if $d(^oddDEF(%class,"m",%method,30)){
+            for %InexLimeMethodForWrite=1:1:^oddDEF(%class,"m",%method,30){
+              w:%InexLimeMethodForWrite'=1 $c(13,10)
+              d ..ExecFrag(^oddDEF(%class,"m",%method,30,%InexLimeMethodForWrite),"/*(",")*/")
+            }
+            k %InexLimeMethodForWrite
+         }
+     }
+     k %InputArgumentsForRunMethod
+     q
+]]></Implementation>
+</Method>
+
+<Method name="ReadBuf">
+<ClassMethod>1</ClassMethod>
+<Implementation><![CDATA[
+  if $d(@..#GlobalMessage@(%ClientIP,%ProcessID,"buff")){
+     s ind=""
+     for {
+       s ind =$o(@..#GlobalMessage@(%ClientIP,%ProcessID,"buff",ind))	
+       q:ind=""
+       w @..#GlobalMessage@(%ClientIP,%ProcessID,"buff",ind) ; _$c(13,10)
+       k @..#GlobalMessage@(%ClientIP,%ProcessID,"buff",ind)
+     }
+  }
+]]></Implementation>
+</Method>
+
+<Method name="MesageForUser">
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+   // выполнить изолированную от основного процесса команду от имени пользователя
+        if $d(@..#GlobalMessage@(%ClientIP,%ProcessID,"MessageForUser")){
+	        try {
+		       x @..#GlobalMessage@(%ClientIP,%ProcessID,"MessageForUser")   
+	         } CATCH { 
+	            w !,"error:"_@..#GlobalMessage@(%ClientIP,%ProcessID,"MessageForUser") 
+	            w !,$ZERROR
+	         }
+	        k @..#GlobalMessage@(%ClientIP,%ProcessID,"MessageForUser")
+            q 1
+        }
+        if $d(@..#GlobalMessage@(%ClientIP,"MessageForUser")){
+	        try {
+		       x @..#GlobalMessage@(%ClientIP,"MessageForUser")   
+	         } CATCH { 
+	            w !,"error:"_@..#GlobalMessage@(%ClientIP,"MessageForUser") 
+	            w !,$ZERROR
+	         }
+	        k @..#GlobalMessage@(%ClientIP,"MessageForUser")
+            q 1
+        }
+	     /// передать команду JS для пользователя
+        if $d(@..#GlobalMessage@(%ClientIP,%ProcessID,"MessageForUserJS")){
+	        &js< #(@..#GlobalMessage@(%ClientIP,%ProcessID,"MessageForUserJS"))# >
+	        k @..#GlobalMessage@(%ClientIP,%ProcessID,"MessageForUserJS")
+	        q 1
+        }
+        if $d(@..#GlobalMessage@(%ClientIP,"MessageForUserJS")){
+	        &js< #(@..#GlobalMessage@(%ClientIP,"MessageForUserJS"))# >
+	        k @..#GlobalMessage@(%ClientIP,"MessageForUserJS")
+	        q 1
+        }
+        ///----------------------------------------
+        q 0
+]]></Implementation>
+</Method>
+
+<Method name="DrawJsFun">
+<Description>
+Выводим библиотеку JS </Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>One=""</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	
+	if $d(@..#GlobalMessage@(%ClientIP,%ProcessID)){
+	   w "     /* JobID="_@..#GlobalMessage@(%ClientIP,%ProcessID)_" */",!	
+	}
+    w "     var ProcessID='"_%ProcessID_"'; ",!	
+    // var windowliast=[];
+    ; w !,"     var PageLib='"_$SYSTEM.CSP.GetDefaultApp($ZU(5))_"/"_$zcvt(##this,"O","URL")_".cls'; "
+    ; w !,"     var PageParent='"_%ParentClass_"'; "
+
+  &js<
+    FountHTMLWorcStationCacheServer=function(MethodName){
+       var arr=new Array();
+       if ((''+FountHTMLWorcStationCacheServer.arguments[1])=='[object Arguments]'){
+          arr.push(FountHTMLWorcStationCacheServer.arguments[0]);for(var ind in FountHTMLWorcStationCacheServer.arguments[1]){if (FountHTMLWorcStationCacheServer.arguments[1][ind]==undefined){continue;} arr.push(FountHTMLWorcStationCacheServer.arguments[1][ind]); }   
+       }else{
+          for(var ind in FountHTMLWorcStationCacheServer.arguments){if (FountHTMLWorcStationCacheServer.arguments[ind]==undefined){continue;} arr.push(FountHTMLWorcStationCacheServer.arguments[ind]); }   
+       }
+      
+       var data = "WARGC=" + (arr.length - 1) + "&WEVENT=" + MethodName.replace(/&amp;/,'&');
+       for (i = 1; i != arr.length; i++) {
+          arg = arr[i];
+          if (typeof arg != "object") {
+               // Convert boolean to Cache value before sending
+               if (typeof arg == "boolean") arg = (arg ? 1 : 0);
+               //data = data + "&WARG_" + i + "=" + encodeURIComponent(arg);
+               data = data + "&WARG_" + i + "=" + arg;
+          } else if (arg != null) {
+               n = 0;
+               for (var el in arg) {
+                    if (typeof arg[el] != "function") {
+                         // data = data + "&W" + i + "=" + encodeURIComponent(arg[el]);
+                         data = data + "&W" + i + "=" + arg[el];
+                         n = n + 1;
+                    }
+               }
+               data = data + "&WLIST" + i + "=" + n;
+          }
+       }
+       var cspIntHTMLBindOneRequest = new XMLHttpRequest();
+           cspIntHTMLBindOneRequest.open('POST', '#($SYSTEM.CSP.GetDefaultApp($ZU(5)))#/#($zcvt(##this,"O","URL"))#.cls/?cspIntRunMethod=1&One=#(One)#&ProcessID=#(%ProcessID)#', false);
+           cspIntHTMLBindOneRequest.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+           cspIntHTMLBindOneRequest.ontimeout = function (e) {
+             alert('Время ожидания ответа вышло!!!!');
+           }
+           cspIntHTMLBindOneRequest.send(data); 
+           if (cspIntHTMLBindOneRequest.status !== 200) {
+	         console.log({"error":cspIntHTMLBindOneRequest.status});
+             return {"error":cspIntHTMLBindOneRequest.status}
+           }
+           return cspIntHTMLBindOneRequest.responseText;
+       }
+     >
+     
+     &js<
+        cspHttpServerMethod=FountHTMLWorcStationCacheServer;
+     >
+     /// обработка асинхронных запросов #call()#
+     &js<
+     FountHTMLWorcStationCacheServerCall=function(MethodName){
+       var arr=new Array();
+       if ((''+FountHTMLWorcStationCacheServerCall.arguments[1])=='[object Arguments]'){
+          arr.push(FountHTMLWorcStationCacheServerCall.arguments[0]);     
+          for(var ind in FountHTMLWorcStationCacheServerCall.arguments[1]){if (FountHTMLWorcStationCacheServerCall.arguments[1][ind]==undefined){continue;} arr.push(FountHTMLWorcStationCacheServerCall.arguments[1][ind]); }   
+       }else{
+          for(var ind in FountHTMLWorcStationCacheServerCall.arguments){if (FountHTMLWorcStationCacheServerCall.arguments[ind]==undefined){continue;} arr.push(FountHTMLWorcStationCacheServerCall.arguments[ind]); }   
+       }
+       var FunCallBack=null;
+       if (arr.length!=1){
+	        if ((typeof arr[1] === 'function')) {  
+                FunCallBack=arr[1]
+                arr.splice(1, 1);
+	        }
+       }
+       var data = "WARGC=" + (arr.length - 1) + "&WEVENT=" + MethodName.replace(/&amp;/,'&');
+       for (i = 1; i != arr.length; i++) {
+          arg = arr[i];
+          if (typeof arg != "object") {
+               // Convert boolean to Cache value before sending
+               if (typeof arg == "boolean") arg = (arg ? 1 : 0);
+               // data = data + "&WARG_" + i + "=" + encodeURIComponent(arg);
+               data = data + "&WARG_" + i + "=" + arg;
+          } else if (arg != null) {
+               n = 0;
+               for (var el in arg) {
+                    if (typeof arg[el] != "function") {
+                         // data = data + "&W" + i + "=" + encodeURIComponent(arg[el]);
+                         data = data + "&W" + i + "=" + arg[el];
+                         n = n + 1;
+                    }
+               }
+               data = data + "&WLIST" + i + "=" + n;
+          }
+       }
+       var cspIntHTMLBindOneRequestCall = new XMLHttpRequest();
+           if (typeof FunCallBack === 'function'){ 
+                cspIntHTMLBindOneRequestCall.open('POST', '#($SYSTEM.CSP.GetDefaultApp($ZU(5)))#/#($zcvt(##this,"O","URL"))#.cls/?cspIntRunMethod=1&One=#(One)#&ProcessID='+ProcessID, true);
+                cspIntHTMLBindOneRequestCall.onreadystatechange = function() {
+                  if (this.readyState == 4 && this.status == 200) {
+                    if (typeof FunCallBack === 'function'){
+                       FunCallBack(this.responseText);
+                     }
+                   };
+                 };
+           }else{
+             cspIntHTMLBindOneRequestCall.open('POST', '#($SYSTEM.CSP.GetDefaultApp($ZU(5)))#/#($zcvt(##this,"O","URL"))#.cls/?cspIntRunMethod=1&isCall=1&One=#(One)#&ProcessID='+ProcessID, true);
+           }
+           cspIntHTMLBindOneRequestCall.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+           cspIntHTMLBindOneRequestCall.send(data);
+           return cspIntHTMLBindOneRequestCall; 
+       }
+     >
+     
+     &js<  cspCallHttpServerMethod=FountHTMLWorcStationCacheServerCall;  >
+ 
+ 
+ 
+    s Interval=%request.Get("interval","")
+    if Interval="",$l(..#Interval)>0  s Interval=+..#Interval
+ 
+ 	if Interval'="" {
+	   s Interval=+Interval
+       &js<
+	        var FountHTMLBindOneCacheServerLoop = new XMLHttpRequest();
+            var FountHTMLBindOneCacheServer=function()
+            {
+                var arr=new Array();
+                FountHTMLBindOneCacheServerLoop.open("POST", '#($SYSTEM.CSP.GetDefaultApp($ZU(5)))#/#($zcvt(##this,"O","URL"))#.cls/?GetMessage=1&One=#(One)#&ProcessID='+ProcessID, true);
+                FountHTMLBindOneCacheServerLoop.onreadystatechange = function() {
+                    if (this.readyState == 4 && this.status == 200) {
+	                    if (this.responseText.length!=0){ 
+                           try {
+	                          eval(this.responseText); 
+	                       } catch (err) {
+	                          console.log(this.responseText); 
+	                       }
+	                    }
+                    };
+                };
+                FountHTMLBindOneCacheServerLoop.send(JSON.stringify(arr));  
+            }
+	        var IntervalRunJobMilSecLoop=#(Interval)#;
+            if (IntervalRunJobMilSecLoop==0){ var IntervalRunJobMilSecLoop=100;}
+            var myVarsetIntervalHTMLMessagejs = setTimeout(function run() {
+                   FountHTMLBindOneCacheServer(); 
+                myVarsetIntervalHTMLMessagejs=setTimeout(run, IntervalRunJobMilSecLoop);
+            }, IntervalRunJobMilSecLoop);
+         >
+	}
+   &js<
+      var windowhashtablist={};
+   >
+
+   d ..readJSFunctionFromCacheClass(##this)
+   //  s ParentClassName1=##this
+   //     s MethodName=""
+   //     for {
+   //	     s MethodName=$o(^oddDEF(ParentClassName1,"m",MethodName))
+   //         q:MethodName=""
+   //         continue:MethodName="init"
+   //         if $d(^oddDEF(ParentClassName1,"m",MethodName,70)) {
+   //
+   //             if $d(^oddDEF(ParentClassName1,"m",MethodName,4)){
+   //	           w !,"/*",!
+   //	           w $replace(^oddDEF(ParentClassName1,"m",MethodName,4),"*/","-//-")
+   //	           w "*/"
+   //             }
+   //	         w !,"  "_MethodName_" = function(" 
+   //	         if $d(^oddDEF(ParentClassName1,"m",MethodName,27)){
+   //		         w ^oddDEF(ParentClassName1,"m",MethodName,27)
+   //	         }
+   //	         w "){"
+   //	         
+   //             for ind=1:1:^oddDEF(ParentClassName1,"m",MethodName,30) {
+   //                w ^oddDEF(ParentClassName1,"m",MethodName,30,ind)_$c(13,10)
+   //             }
+   //             w "}"
+   //         }
+   //     }
+ 	q ""
+]]></Implementation>
+</Method>
+
+<Method name="ExecFrag">
+<Description>
+Метод разбивки исходного текста на Cache` код и HTML текст</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>SrcCode="",Beg="",End=""</FormalSpec>
+<Implementation><![CDATA[
+      q:SrcCode=""   q:Beg=""    q:End="" 
+      s html=SrcCode
+      for {
+          s HtmlFrag=$e(SrcCode,1,$l($p(SrcCode,Beg,1)) ) 
+          w HtmlFrag
+          s SrcCode=$e(SrcCode,$l(HtmlFrag)+1+$l(Beg),$l(SrcCode) ) 
+          s CodeFrag=$e(SrcCode,1, $l($p(SrcCode,End,1)) ) 
+          s SrcCode=$e(SrcCode,$l(CodeFrag)+1+$l(End),$l(SrcCode) ) 
+          if $l(CodeFrag)>0{
+             TRY {  x $tr(CodeFrag,$c(13,10),"   ")   } CATCH ErrorHandle {    zw ErrorHandle  }
+          }
+        q:SrcCode=""
+      }
+]]></Implementation>
+</Method>
+
+<Method name="readJSFunctionFromCacheClass">
+<Description><![CDATA[
+<pre>
+
+Варианты параметров классов 
+ 1) [ Language = cache, WebMethod ]
+ 2) [ Language = javascript, WebMethod ]
+
+Пример классов , которые будут интерпритированы в JS функции:
+    ClassMethod test2()as %String [ Language = cache, WebMethod ]{ zw  q ""}
+    ClientMethod test3() [ Language = javascript, WebMethod ]{    alert('test3()');}
+    Property cspXMLHttp As %String [ ServerOnly = 1 ];
+    Property cspUseGetMethod As %Boolean [ InitialExpression = 0, ServerOnly = 1 ];
+    Property cspMozilla As %Boolean [ InitialExpression = "nill", ServerOnly = 1 ];
+   
+</pre>
+ <h2>Переписать  %Library.ClassDefinition на  <h2>]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>ProcessIDName="",MethodName="",DrawDescript=1</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+     s onEventFun=",onblur,onerror,onfocus,onload,onresize,onscroll,onbeforeunload,onhashchange,onlanguagechange,onmessage,onoffline,ononline,onpagehide,onpageshow,onpopstate,onrejectionhandled,onstorage,onunhandledrejection,onunload,onabort,oncancel,oncanplay,oncanplaythrough,onchange,onclick,onclose,oncontextmenu,oncuechange,ondblclick,ondrag,ondragend,ondragenter,ondragleave,ondragover,ondragstart,ondrop,ondurationchange,onemptied,onended,oninput,oninvalid,onkeydown,onkeypress,onkeyup,onloadeddata,onloadedmetadata,onloadstart,onmousedown,onmouseenter,onmouseleave,onmousemove,onmouseout,onmouseover,onmouseup,onmousewheel,onpause,onplay,onplaying,onprogress,onratechange,onreset,onseeked,onseeking,onselect,onshow,onstalled,onsubmit,onsuspend,ontimeupdate,ontoggle,onvolumechange,onwaiting,onauxclick,ongotpointercapture,onlostpointercapture,onpointercancel,onpointerdown,onpointerenter,onpointerleave,onpointermove,onpointerout,onpointerover,onpointerup,onbeforecopy,onbeforecut,onbeforepaste,oncopy,oncut,onpaste,onsearch,onselectstart,onwheel,onwebkitfullscreenchange,onwebkitfullscreenerror"
+     s ClassOref=##class(%ClassDefinition).%OpenId(ProcessIDName)
+     if ClassOref {
+       s ConstructMethod=$p(ProcessIDName,".",$l(ProcessIDName,"."))
+       s count=ClassOref.Properties.Count() 
+       for i=1:1:count {
+            s nam=ClassOref.Properties.GetAt(i).Name
+            continue:'$d(^oddDEF(ProcessIDName,"a",nam,57))
+            continue:^oddDEF(ProcessIDName,"a",nam,57)'=1
+            w "  var "_ClassOref.Properties.GetAt(i).Name_" "
+            if $d(^oddDEF(ProcessIDName,"a",nam,31)) {
+                 s val=^oddDEF(ProcessIDName,"a",nam,31)
+                 if val="""null""" w "=null;"_$c(13,10)  continue
+                 s typ=""
+                 if $d(^oddDEF(ProcessIDName,"a",nam,5)) {
+                    s typ=^oddDEF(ProcessIDName,"a",nam,5)
+                    if $e(typ,1,1)="%",$l(typ,".")=1 {
+                       s typ=$REPLACE(typ,"%","%Library.")
+                    }
+                 }   
+                 if typ="" {
+                     if $l(typ ," ")=1 { w "="_$e(val,2,$l(val)-1)_";"_$c(13,10)  continue }
+                    try {   x "w "_val   }catch(e){  w "="_$e(val,2,$l(val)-1)_";"_$c(13,10)  continue }
+                 }
+                 
+                 if typ="%Library.Boolean" {
+                      if $e(val,1,1)="""" {
+                         w "=" 
+                         try {   x "w "_val   }catch(e){  if +val=1 { w "=true"  }else     { w "=false" }   }
+                      }else {
+                        if val=1 { w "=true"  }else     { w "=false" }
+                      }
+                 }elseif  typ="%Library.Integer" {
+                     if $e(val,1,1)="""" {
+                         w "=" 
+                         try {   x "w "_val   }catch(e){  s val=+val  w val }
+                      } else {
+                          s val=+val  w val
+                      } 
+                 }else{
+	                 
+                     if $e(val,1,1)'="""" {
+                           w "=""" 
+                           try {   x "w "_val   }catch(e){  w val   }
+                           w """"
+                      }else {
+                         w "="_val
+                      } 
+                 }
+            }
+            w ";"_$c(13,10) 
+       }
+       s ConstructMethodIndex=""
+       s count=ClassOref.Methods.Count()
+       for i=1:1:count {
+            if (MethodName=""){
+               continue:$l(ClassOref.Methods.GetAt(i).Name,"OnPage")'=1
+               continue:ClassOref.Methods.GetAt(i).Name="OnPreHTTP"
+               continue:ClassOref.Methods.GetAt(i).Name="OnPostHTTP"
+               continue:ClassOref.Methods.GetAt(i).Name="getLibOne"
+               continue:ClassOref.Methods.GetAt(i).Name="GetJSMethodFromClientMethod"
+               continue:ClassOref.Methods.GetAt(i).Name="readJSFunctionFromCacheClass"
+            }else{
+                continue:ClassOref.Methods.GetAt(i).Name'=MethodName   
+            }
+           /// [ ServerOnly = 1 ]
+           // continue:'$d(^oddDEF(ProcessIDName,"m",ClassOref.Methods.GetAt(i).Name,59))
+           // continue:^oddDEF(ProcessIDName,"m",ClassOref.Methods.GetAt(i).Name,59)'=1
+           
+           /// [ WebMethod ]
+           continue:'$d(^oddDEF(ProcessIDName,"m",ClassOref.Methods.GetAt(i).Name,51))
+           continue:^oddDEF(ProcessIDName,"m",ClassOref.Methods.GetAt(i).Name,51)'=1
+          
+          if $ZCVT(ClassOref.Methods.GetAt(i).Name,"L")=$ZCVT(ConstructMethod,"L"){
+             s ConstructMethodIndex=i
+             continue    
+          }
+          
+          if DrawDescript=1 {
+             if $l(ClassOref.Methods.GetAt(i).Description)>0,ProcessIDName'=##this{
+                w !,"/*",!
+                w $replace(ClassOref.Methods.GetAt(i).Description,"*/","-/-")
+                w !,"*/"
+             }
+          }
+          // Получаем JS представление Cache клиент метода
+           if ClassOref.Methods.GetAt(i).Language="javascript" {
+               w !,"var "_ClassOref.Methods.GetAt(i).Name_"=function("
+               s param=ClassOref.Methods.GetAt(i).FormalSpec
+               for ind=1:1:$l(param,","){
+                   s subParam=$p(param,",",ind)
+                   s subParam=$p(subParam,":",1)
+                   s subParam=$p(subParam,"=",1)
+                   w:ind'=1 ","
+                   w subParam
+               }
+               w "){",!
+                 d ..ExecFrag(ClassOref.Methods.GetAt(i).Code,"/*(",")*/")
+                 // w ClassOref.Methods.GetAt(i).Code
+                 w !,"};"
+                
+            }
+           // Получаем JS представление Cache класс метода
+           if ClassOref.Methods.GetAt(i).Language="cache" {
+                   w !,"var "_ClassOref.Methods.GetAt(i).Name_"=function(){",!
+                   ; if $d(^oddDEF(ProcessIDName,"m",ClassOref.Methods.GetAt(i).Name,42)){ w "return "}
+                   s WEVENT=$$$cspEncode(@..#GlobalMessage@(%ClientIP,%ProcessID,"SessionKey"),$lb(ProcessIDName_"."_ClassOref.Methods.GetAt(i).Name))
+                   w "   return cspHttpServerMethod('"_WEVENT_"',arguments);"
+                   w !,"};"
+           }
+                
+         }
+         // После отрисовки функций, создаем конструктор( если конечно он встретился ранее)
+         if ConstructMethodIndex'="" {
+           s i=ConstructMethodIndex
+           if ClassOref.Methods.GetAt(i).Language="javascript" {
+              d ..ExecFrag(ClassOref.Methods.GetAt(i).Code,"/*(",")*/")
+           }
+           if ClassOref.Methods.GetAt(i).Language="cache" {
+              s WEVENT=$$$cspEncode(@..#GlobalMessage@(%ClientIP,%ProcessID,"SessionKey"),$lb(ProcessIDName_"."_ClassOref.Methods.GetAt(i).Name))
+              w " cspHttpServerMethod('"_WEVENT_"',arguments);"
+           }
+         }
+       }
+       q ""
+]]></Implementation>
+</Method>
+
+<Method name="GetIP">
+<Description>
+Получить IP клиента</Description>
+<ClassMethod>1</ClassMethod>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+    s ip=$ZU(67, 15, $job)
+    if ip="::1" s ip=""
+    if ip="" {
+       s I=$ZU(111,0)   
+       s ip=$A(I,1)_"."_$A(I,2)_"."_$A(I,3)_"."_$A(I,4)
+       k I
+    }
+   q ip
+]]></Implementation>
+</Method>
+
+<Method name="sleep">
+<Description>
+Пауза в программе</Description>
+<FormalSpec>sleepDuration</FormalSpec>
+<Language>javascript</Language>
+<WebMethod>1</WebMethod>
+<ClientMethod>1</ClientMethod>
+<Implementation><![CDATA[
+   var now = new Date().getTime();
+   while(new Date().getTime() < now + sleepDuration){ /* do nothing */ }
+]]></Implementation>
+</Method>
+
+<Method name="DrawFunName">
+<Description>
+передаем в дочерний класс функции родительского класса</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>ParentClass=""</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+   // s ParentClass=$SYSTEM.CSP.GetClassName("/"_%ParentClass) 
+       s ParentClass=##this
+       d $system.OBJ.GetDependencies(ParentClass,.included)
+       s ClassParentTmp=""
+       for {
+         s ClassParentTmp=$o(included(ClassParentTmp))
+         q:ClassParentTmp=""
+         if $d(^oddDEF(ClassParentTmp,"m")){
+            s MethodName=""
+            for {
+    	       s MethodName=$o(^oddDEF(ClassParentTmp,"m",MethodName))
+               q:MethodName=""
+               continue:'$d(^oddDEF(ClassParentTmp,"m",MethodName,70))
+               w " "_MethodName_"  = window.opener."_MethodName_"; " 
+            }
+         }
+       }
+   q ""
+]]></Implementation>
+</Method>
+
+<Method name="setCookie">
+<Description>
+записать значение     </Description>
+<FormalSpec>cname,cvalue,exdays</FormalSpec>
+<Language>javascript</Language>
+<WebMethod>1</WebMethod>
+<ClientMethod>1</ClientMethod>
+<Implementation><![CDATA[ var d = new Date(); d.setTime(d.getTime() + (exdays)); var expires = 'expires='+d.toUTCString(); document.cookie = cname + '=' + cvalue + "; " + expires;
+]]></Implementation>
+</Method>
+
+<Method name="delCookie">
+<Description>
+Удалить значение</Description>
+<FormalSpec>name</FormalSpec>
+<Language>javascript</Language>
+<WebMethod>1</WebMethod>
+<ClientMethod>1</ClientMethod>
+<Implementation><![CDATA[ setCookie(name, '', { expires: -1  })
+]]></Implementation>
+</Method>
+
+<Method name="getCookie">
+<Description>
+Получить значение</Description>
+<FormalSpec>cname</FormalSpec>
+<Language>javascript</Language>
+<WebMethod>1</WebMethod>
+<ClientMethod>1</ClientMethod>
+<Implementation><![CDATA[ var name = cname + '='; var ca = document.cookie.split(';'); for(var i=0; i!=ca.length; i++) { var c = ca[i]; while (c.charAt(0)==' ') c = c.substring(1); if (c.indexOf(name) == 0) return c.substring(name.length,c.length); } return '';
+]]></Implementation>
+</Method>
+
+<Method name="SendJS">
+<Description>
+Оставить JS сообщение пользователю
+d ##class(%ZCSP.Page).SendJS("10.20.29.67","alert(11)","SIRENA")
+d ##class(%ZCSP.Page).SendJS("10.20.29.67","alert(11)")</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>ip="",Message="",ProcessID=""</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	q:ip="" ""
+	if ProcessID="" {
+       s @..#GlobalMessage@(ip,"MessageForUserJS")=Message
+       q ""
+	}
+    s @..#GlobalMessage@(ip,ProcessID,"MessageForUserJS")=Message
+    q ""
+]]></Implementation>
+</Method>
+
+<Method name="CloseAllProcess">
+<Description>
+d ##class(%ZCSP.Page).CloseAllProcess()</Description>
+<ClassMethod>1</ClassMethod>
+<ProcedureBlock>1</ProcedureBlock>
+<Implementation><![CDATA[
+  s ip=""
+  for {
+	  s ip=$o(@..#GlobalMessage@(ip)  )
+	  q:ip=""
+	  s host=""
+      for {
+	     s host=$o(@..#GlobalMessage@(ip,host)  )
+	     q:host=""
+	     if $d(@..#GlobalMessage@(ip,host)){
+	        s jobUser=@..#GlobalMessage@(ip,host)
+            do $system.Event.Signal(jobUser,"exit")
+	        w !,"ip: "_ip_"  "_host_"     "_jobUser_"  "_$zu(4,jobUser)
+	        k @..#GlobalMessage@(ip,host)
+	     }
+      }
+  }
+  k @..#GlobalMessage
+]]></Implementation>
+</Method>
+
+<Method name="SirenaIdent">
+<ClassMethod>1</ClassMethod>
+<ProcedureBlock>1</ProcedureBlock>
+<Implementation><![CDATA[
+       if $d(^Auth.SysUserD) {
+             s SqlStrTmp="SELECT FullName as fullname,UserName as UserLogin,LastIP, id as UserID FROM Auth.SysUser WHERE LastIP='"_%ClientIP_"'"
+             s SQLobj=##class(%SQL.Statement).%New()
+             d SQLobj.%Prepare(SqlStrTmp)
+             s DataSet=SQLobj.%Execute()
+             while DataSet.%Next()
+             { 
+                s @..#GlobalMessage@(%ClientIP,%ProcessID,"UserName")   = $lb(DataSet.UserID,DataSet.fullname,DataSet.UserLogin)
+             }
+         }
+]]></Implementation>
+</Method>
+</Class>
+</Export>
