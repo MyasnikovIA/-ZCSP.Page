@@ -8,9 +8,7 @@
     <br> <!--  <script language="JavaScript" type="text/javascript" src="%25ZCSP.Page.cls/?include=#(##this)#"></script> -->
     <br> <!--  <script language="JavaScript" type="text/javascript" src="%25ZCSP.Page.cls/?ProcessID=ИдентификаторПроцесса&interval=1000"></script> -->
     <pre> 
-    Пример для ПК SIRENA
-      &lt;script language="JavaScript" type="text/javascript" src="#($SYSTEM.CSP.GetDefaultApp($ZU(5)))#/#($zcvt("%ZCSP.Page","O","URL"))#.cls?ProcessID=#($zu(5))#&interval=15000"&gt;&lt;/script&gt;
-      <!--  <script language="JavaScript" type="text/javascript" src="#($SYSTEM.CSP.GetDefaultApp($ZU(5)))#/#($zcvt("%ZCSP.Page","O","URL"))#.cls?ProcessID=#($zu(5))#&interval=15000"></script>  -->
+ 
     
     Закрыть процесс на сервере
       #server(logout())#
